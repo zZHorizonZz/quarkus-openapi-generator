@@ -1,7 +1,6 @@
 package io.quarkiverse.openapi.server.generator.deployment.codegen;
 
-import static io.quarkiverse.openapi.server.generator.deployment.CodegenConfig.getBasePackagePropertyName;
-import static io.quarkiverse.openapi.server.generator.deployment.CodegenConfig.getCodegenReactive;
+import static io.quarkiverse.openapi.server.generator.deployment.CodegenConfig.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.apicurio.hub.api.codegen.JaxRsProjectSettings;
-import io.apicurio.hub.api.codegen.OpenApi2JaxRs;
+import io.apicurio.hub.api.codegen.OpenApi2QuarkusServerGenerator;
 import io.quarkus.bootstrap.prebuild.CodeGenException;
 
 public class ApicurioCodegenWrapper {
@@ -30,6 +29,8 @@ public class ApicurioCodegenWrapper {
 
     private final File outdir;
     private final JaxRsProjectSettings projectSettings;
+    private final boolean reactiveMutiny;
+    private final boolean returnResponse;
 
     public ApicurioCodegenWrapper(Config config, File outdir) {
         this(config, outdir, defaultProjectSettings());
@@ -40,6 +41,13 @@ public class ApicurioCodegenWrapper {
         this.projectSettings = projectSettings;
         this.projectSettings.setJavaPackage(getBasePackage(config));
         this.projectSettings.setReactive(getReactiveValue(config));
+
+        this.reactiveMutiny = getReactiveMutinyValue(config);
+        this.returnResponse = getReturnResponseValue(config);
+
+        if (reactiveMutiny) {
+            this.projectSettings.setReactive(true);
+        }
     }
 
     public void generate(Path openApiResource) throws CodeGenException {
@@ -61,7 +69,7 @@ public class ApicurioCodegenWrapper {
 
         try (FileOutputStream fos = new FileOutputStream(zipFile);
                 FileInputStream openApiStream = new FileInputStream(openApiFile)) {
-            OpenApi2JaxRs generator = new OpenApi2JaxRs();
+            OpenApi2QuarkusServerGenerator generator = new OpenApi2QuarkusServerGenerator(reactiveMutiny, returnResponse);
             generator.setSettings(projectSettings);
             generator.setUpdateOnly(true);
             generator.setOpenApiDocument(openApiStream);
@@ -115,6 +123,18 @@ public class ApicurioCodegenWrapper {
     private Boolean getReactiveValue(final Config config) {
         return config
                 .getOptionalValue(getCodegenReactive(), Boolean.class)
+                .orElse(Boolean.FALSE);
+    }
+
+    private Boolean getReactiveMutinyValue(final Config config) {
+        return config
+                .getOptionalValue(getCodegenReactiveMutiny(), Boolean.class)
+                .orElse(Boolean.FALSE);
+    }
+
+    private Boolean getReturnResponseValue(final Config config) {
+        return config
+                .getOptionalValue(getCodegenReturnResponse(), Boolean.class)
                 .orElse(Boolean.FALSE);
     }
 

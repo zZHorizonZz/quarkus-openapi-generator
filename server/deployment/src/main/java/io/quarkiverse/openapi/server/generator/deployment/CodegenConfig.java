@@ -11,6 +11,8 @@ public class CodegenConfig {
     private static final String CODEGEN_SPEC = CODEGEN_TIME_CONFIG_PREFIX + ".spec";
     private static final String INPUT_BASE_DIR = CODEGEN_TIME_CONFIG_PREFIX + ".input-base-dir";
     private static final String CODEGEN_REACTIVE = CODEGEN_TIME_CONFIG_PREFIX + ".reactive";
+    private static final String CODEGEN_REACTIVE_MUTINY = CODEGEN_REACTIVE + ".mutiny";
+    private static final String CODEGEN_RETURN_RESPONSE = CODEGEN_TIME_CONFIG_PREFIX + ".return-response";
 
     public static String getBasePackagePropertyName() {
         return CODEGEN_BASE_PACKAGE;
@@ -26,5 +28,13 @@ public class CodegenConfig {
 
     public static String getCodegenReactive() {
         return CODEGEN_REACTIVE;
+    }
+
+    public static String getCodegenReactiveMutiny() {
+        return CODEGEN_REACTIVE_MUTINY;
+    }
+
+    public static String getCodegenReturnResponse() {
+        return CODEGEN_RETURN_RESPONSE;
     }
 }
